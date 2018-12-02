@@ -290,6 +290,12 @@ typedef struct core_control_block CCB;		/**< @brief Forward declaration */
 typedef struct device_control_block DCB;	/**< @brief Forward declaration */
 typedef struct file_control_block FCB;		/**< @brief Forward declaration */
 typedef struct process_thread_control_block PTCB;		/**< @brief Forward declaration */
+typedef struct pipe_control_block PipeCB;
+typedef struct socket_control_block SCB;
+typedef struct request_control_block RCB;
+{
+	
+};
 
 /** @brief A convenience typedef */
 typedef struct resource_list_node * rlnode_ptr;
@@ -316,6 +322,8 @@ typedef struct resource_list_node {
     DCB* dcb;
     FCB* fcb;
     PTCB* ptcb;
+    SCB* scb;
+    RCB* rcb;
     void* obj;
     rlnode_ptr node;
     intptr_t num;
