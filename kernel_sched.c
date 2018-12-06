@@ -306,21 +306,8 @@ static TCB* sched_queue_select()
   		sched_make_ready(tcb);
   }
 
-  
-  /*WE SEARCH FOR THREADS THAT CAUSE STARVING. THEY ARE USUALLY IN LOW PRIORITY QUEUE. THEN WE BOOST THEM IN HIGHER PRIORITY QUEUES
-  if((int)rlist_len(&SCHED[NUM_QUEUES-1]) >=80)
-  {
-    rlnode * temp = NULL;
-    while(! is_rlist_empty(&SCHED[NUM_QUEUES-1])) {
-           temp = rlist_pop_back(&SCHED[NUM_QUEUES-1]);
-           rlist_push_front(&SCHED[NUM_QUEUES-2], & temp->tcb->sched_node);
-    }
-  }
-  */
-  /* Get the head of the SCHED list */
-  /* WE CHECK IF QUEUES ARE EMPTY */
   int i=0;
-  while(is_rlist_empty(& SCHED[i]) && i<3)
+  while(is_rlist_empty(& SCHED[i]) && i<NUM_QUEUES)
   { 
     i++;
   }
@@ -437,7 +424,7 @@ void yield(enum SCHED_CAUSE cause)
       fl=1;
     }
     break;
-    default:
+    default: fl=0;
     break;
   }
   switch(current->state)

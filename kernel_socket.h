@@ -63,10 +63,12 @@ typedef struct request_control_block{
 }RCB;
 
 SCB* initiallize_socket(Fid_t fid, port_t port);
+RCB* new_request(SCB* sock);
 int socket_read(void* dev, char* buf, unsigned int size);
 int socket_write(void* dev, const char* buf, unsigned int size);
 int listener_close(void* dev);
 int unbound_close(void* dev);
 int peer_close(void* dev);
+int exhausted_fids();
 
 #endif

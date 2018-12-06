@@ -39,6 +39,7 @@ PTCB* allocate_ptcb(Task task, int argl, void* args) /*initialiaze ptcb*/
   ptcb->args=args;
   ptcb->exited=0;
   ptcb->detatched=0;
+  ptcb->mainthread=0;
   ptcb->cv_join_thread=COND_INIT;
   ptcb->ref_count=0;
 
@@ -131,3 +132,14 @@ void sys_ThreadExit(int exitval)
   kernel_sleep(EXITED,SCHED_USER);
 }
 
+PTCB* initialize_main_PTCB(){
+
+    PTCB* ptcb = (PTCB*) xmalloc(sizeof(PTCB));    /** Allocate new PTCB via xmalloc **/
+    ptcb->exited = 0;
+    ptcb->detatched = 0;
+    ptcb->cv_join_thread = COND_INIT;
+    ptcb->mainthread = 1;       /** It is main thread ! **/
+
+    return ptcb;
+
+};

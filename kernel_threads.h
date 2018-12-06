@@ -14,6 +14,8 @@ typedef struct process_thread_control_block{
 
 	Task pcb_task; /*the tast of parent */
 
+	int mainthread;
+
 	int argl; /*arguments of task*/
 	void* args; /*       >>         */
 
@@ -32,5 +34,7 @@ PTCB* allocate_ptcb(Task task, int argl, void* args); /*initialiaze ptcb*/
 void start_thread();
 
 void deletePTCB(PTCB* ptcb);
+
+PTCB* initialize_main_PTCB(); //initialliaze a mainthread
 
 #endif

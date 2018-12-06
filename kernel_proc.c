@@ -181,8 +181,11 @@ Pid_t sys_Exec(Task call, int argl, void* args)
     the initialization of the PCB.
    */
   if(call != NULL) {
-    newproc->main_thread = spawn_thread(newproc, start_main_thread);
-    wakeup(newproc->main_thread);
+    newproc->ptcb_counter++;
+    newproc->main_thread = spawn_thread(newproc, start_main_thread); // Create main thread of proccess 
+    newproc->main_thread->owner_ptcb = initialize_main_PTCB(); //Init main PTCB thread changing "mainthread" PTCB 
+                                                                //variable to 1, so we know that refers to main PTCB thread
+    wakeup(newproc->main_thread);                               //Wake up thread in order to be added in scheduler 
   }
 
 
