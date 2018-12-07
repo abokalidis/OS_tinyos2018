@@ -534,7 +534,7 @@ void gain(int preempt)
         break;
       case EXITED:
         if(prev->owner_ptcb->mainthread == 0) prev->owner_ptcb->exited = 1;
-                CURPROC->ptcb_counter--;
+        CURPROC->ptcb_counter--;
       	release_TCB(prev);
         break;
       case STOPPED:
