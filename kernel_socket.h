@@ -44,6 +44,7 @@ typedef struct socket_control_block{
     int port;
     int ispeer;
     int connected;
+    int closed;
 
     union{
         unbound_socket u_socket;

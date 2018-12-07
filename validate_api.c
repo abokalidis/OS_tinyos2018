@@ -947,7 +947,7 @@ BOOT_TEST(test_exit_many_threads,
 {
 
 	int task(int argl, void* args) {
-		fibo(20);
+		fibo(30);
 		return 2;
 	}
 
@@ -955,7 +955,7 @@ BOOT_TEST(test_exit_many_threads,
 		for(int i=0;i<5;i++)
 			ASSERT(CreateThread(task, 0, NULL) != NOTHREAD);
 
-		fibo(15);
+		fibo(20);
 		return 0;
 	}
 
@@ -1464,7 +1464,7 @@ BOOT_TEST(test_accept_unblocks_on_close,
 	Tid_t t = CreateThread(accept_connection, 0, NULL);
 
 	/* Here, we just wait some time, (of course, this is technically a race condition :-( */
-	fibo(20);
+	fibo(30);
 	Close(lsock);
 
 	ThreadJoin(t,NULL);

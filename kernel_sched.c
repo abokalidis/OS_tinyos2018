@@ -283,8 +283,12 @@ static void sched_make_ready(TCB* tcb)
 	tcb->state = READY;
 
 	/* Possibly add to the scheduler queue */
-	if(tcb->phase == CTX_CLEAN) 
-		sched_queue_add(tcb);
+	if(tcb->phase == CTX_CLEAN) {
+		
+	if(tcb->priority>=1) tcb->priority--;
+		
+	sched_queue_add(tcb);
+    }
 }
 
 
@@ -305,18 +309,17 @@ static TCB* sched_queue_select()
   			break;
   		sched_make_ready(tcb);
   }
-
-  int i=0;
-  while(is_rlist_empty(& SCHED[i]) && i<NUM_QUEUES)
-  { 
-    i++;
-  }
-  if(!is_rlist_empty(& SCHED[i])) /* When the list is empty, this is NULL */
-  {
-    rlnode * sel = rlist_pop_front(& SCHED[i]);
-    return sel->tcb;
-  }
   
+  int i=0;
+  while(i<NUM_QUEUES)
+  { 
+  	if(!is_rlist_empty(& SCHED[i])) /* When the list is empty, this is NULL */
+    {
+     rlnode * sel = rlist_pop_front(& SCHED[i]);
+     return sel->tcb;
+    }
+    i++;
+  }  
     return NULL;
 } 
 
@@ -408,7 +411,7 @@ void yield(enum SCHED_CAUSE cause)
   {
     case SCHED_QUANTUM:
     fl=0;
-    if(current->priority<2)
+    if(current->priority<NUM_QUEUES-1)
     current->priority++;
     break;
     case SCHED_IO:
@@ -417,12 +420,20 @@ void yield(enum SCHED_CAUSE cause)
     current->priority--;  
     break;
     case SCHED_MUTEX:
-    if(current->priority<2 && fl==1){
+    if(current->priority<NUM_QUEUES-1 && fl==1){
       current->priority++;
       fl=0;
     }else{
       fl=1;
     }
+    break;
+    case SCHED_IDLE:
+    break;
+    case SCHED_USER:
+    break;
+    case SCHED_PIPE:
+    break;
+    case SCHED_POLL:
     break;
     default: fl=0;
     break;
@@ -442,8 +453,9 @@ void yield(enum SCHED_CAUSE cause)
       fprintf(stderr, "BAD STATE for current thread %p in yield: %d\n", current, current->state);
       assert(0);  /* It should not be READY or EXITED ! */
   }
-
-  int k=NUM_QUEUES-1;
+  
+  //BOOST THREADS
+  int k=NUM_QUEUES-1; 
   while(is_rlist_empty(&SCHED[k]) && k>1)
   {
     k--;
@@ -457,7 +469,6 @@ void yield(enum SCHED_CAUSE cause)
            rlist_push_front(&SCHED[k-1], & temp->tcb->sched_node);
     }
   }
-  
 
   /* Get next */
   TCB* next = sched_queue_select();
@@ -521,6 +532,8 @@ void gain(int preempt)
         if(prev->type != IDLE_THREAD) sched_queue_add(prev);
         break;
       case EXITED:
+        if(prev->owner_ptcb->mainthread == 0) prev->owner_ptcb->exited = 1;
+                CURPROC->ptcb_counter--;
       	release_TCB(prev);
         break;
       case STOPPED:

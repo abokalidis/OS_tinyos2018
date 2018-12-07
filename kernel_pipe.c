@@ -86,7 +86,7 @@ int rpipe_read(void* dev, char *buf, unsigned int size)
     }else { m=size;}
 
     for(i=0;i<m;i++){
-        if(pipe->R == Max_Pipe_Buffer) pipe->R=0;
+        if(pipe->R == Max_Pipe_Buffer-1) pipe->R=0;
 
         buf[i] = pipe->BUFFER[pipe->R];
         pipe->R++;
@@ -129,13 +129,13 @@ int wpipe_write(void* dev, const char* buf, unsigned int size)
     	return -1;
     }
 
-    while(size > pipe->free_bytes){
+    while(size > pipe->free_bytes && pipe->unread_bytes > pipe->free_bytes){
         kernel_broadcast(&pipe->cv_Full);            //buffer is full  
         kernel_wait(&pipe->cv_Empty,SCHED_PIPE);     //sleep writer while !cv_empty
     }   
     
     for(i=0;i<size;i++){
-        if(pipe->W == Max_Pipe_Buffer) pipe->W=0;
+        if(pipe->W == Max_Pipe_Buffer-1) pipe->W=0;
 
         pipe->BUFFER[pipe->W] = buf[i];        
     	pipe->W++;

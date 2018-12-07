@@ -88,7 +88,10 @@ Fid_t sys_Accept(Fid_t lsock)
 	if(exhausted_fids()) return NOFILE; //check if fids are exhausted
 
 	while(is_rlist_empty(&listener->l_socket.Queue))//check if the queue of listener is empty so as to wait for new requests
-		{ kernel_wait(&listener->l_socket.reqavailable_cv,SCHED_USER);}
+		{ 
+          if(listener->closed==1) return NOFILE;
+          kernel_wait(&listener->l_socket.reqavailable_cv,SCHED_USER);
+        }
 
 	rlnode* request = rlist_pop_front(&listener->l_socket.Queue); //take first request
 
@@ -109,7 +112,7 @@ Fid_t sys_Accept(Fid_t lsock)
 
 	listener->l_socket.server= server;
 
-	kernel_signal(&request->rcb->req_cv); //signal requests to take place for other admissions
+	kernel_broadcast(&request->rcb->req_cv); //signal requests to take place for other admissions
 
 	return server->fid;
 }
@@ -142,7 +145,7 @@ int sys_Connect(Fid_t sock, port_t port, timeout_t timeout)
 
     if(is_rlist_empty(&listener->l_socket.Queue)) {
 
-    	kernel_signal(&listener->l_socket.reqavailable_cv);
+    	kernel_broadcast(&listener->l_socket.reqavailable_cv);
 
     	rlnode_init(&new_req->req_node,new_req);
     	rlist_push_back(&listener->l_socket.Queue,&new_req->req_node);
@@ -234,6 +237,7 @@ SCB* initiallize_socket(Fid_t fid, port_t port){
     socket->connected = 0;
     socket->ispeer = 0;
     socket->fid = fid;
+    socket->closed = 0;
     socket->fcb_owner = get_fcb(fid);
     socket->fcb_owner->streamobj = socket;
     socket->fcb_owner->streamfunc = &unbound_socket_ops;
@@ -283,6 +287,10 @@ int listener_close(void* dev){
     
     if(PORT_MAP[socket->port] != NULL) PORT_MAP[socket->port] = NULL; //free Listener socket from PORT MAP 
 
+    socket->closed = 1;
+
+    kernel_broadcast(&socket->l_socket.reqavailable_cv);
+
     free(socket);
 
     return 0;
@@ -291,6 +299,8 @@ int unbound_close(void* dev){
 
 	SCB* socket = (SCB*) dev;
     
+    socket->closed = 1;
+
     free(socket);
 
     return 0;
@@ -298,6 +308,8 @@ int unbound_close(void* dev){
 int peer_close(void* dev){
 
 	SCB* peer = (SCB*) dev;
+
+    peer->closed = 1;
 
 	PipeCB* conn_pipe = peer->p_socket.pipe_read; 
                                                 //first we close reader from current pipe 

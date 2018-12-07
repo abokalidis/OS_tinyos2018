@@ -4,7 +4,7 @@
 #include "kernel_dev.h"
 #include "tinyos.h"
 
-#define Max_Pipe_Buffer 32768 //8192 = 8KB //16384 = 16KB //24576 = 24KB
+#define Max_Pipe_Buffer 8192 //8192 = 8KB || 16384 = 16KB || 24576 = 24KB || 32768 = 32KB
 
 typedef struct pipe_control_block
 {
