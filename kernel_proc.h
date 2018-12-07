@@ -59,6 +59,16 @@ typedef struct process_control_block {
   int ptcb_counter; //count the num of ptcb
 } PCB;
 
+typedef struct info_system_control_block {
+
+  procinfo pinfo;
+  int Cursor;
+  int closed;
+
+}infosysCB;
+
+int infosys_read(void* dev,char* buf,uint size);
+int infosys_close(void* dev);
 
 /**
   @brief Initialize the process table.

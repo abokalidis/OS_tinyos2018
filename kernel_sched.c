@@ -136,6 +136,7 @@ TCB* spawn_thread(PCB* pcb, void (*func)())
   tcb->thread_func = func;
   tcb->wakeup_time = NO_TIMEOUT;
   tcb->priority = 0;
+  tcb->fl = 0;
   rlnode_init(& tcb->sched_node, tcb);  /* Intrusive list node */
 
 
@@ -402,7 +403,7 @@ void yield(enum SCHED_CAUSE cause)
 
   TCB* current = CURTHREAD;  /* Make a local copy of current process, for speed */
 
-  int fl; /*flag to check 2 consecutive sched_mutex*/
+  //int fl; /*flag to check 2 consecutive sched_mutex*/
 
   int current_ready = 0;
 
@@ -410,21 +411,21 @@ void yield(enum SCHED_CAUSE cause)
   switch(cause)
   {
     case SCHED_QUANTUM:
-    fl=0;
+    current->fl=0;
     if(current->priority<NUM_QUEUES-1)
     current->priority++;
     break;
     case SCHED_IO:
-    fl=0;
+    current->fl=0;
     if(current->priority>0)
     current->priority--;  
     break;
     case SCHED_MUTEX:
-    if(current->priority<NUM_QUEUES-1 && fl==1){
+    if(current->priority<NUM_QUEUES-1 && current->fl==1){
       current->priority++;
-      fl=0;
+      current->fl=0;
     }else{
-      fl=1;
+      current->fl=1;
     }
     break;
     case SCHED_IDLE:
@@ -435,7 +436,7 @@ void yield(enum SCHED_CAUSE cause)
     break;
     case SCHED_POLL:
     break;
-    default: fl=0;
+    default: current->fl=0;
     break;
   }
   switch(current->state)

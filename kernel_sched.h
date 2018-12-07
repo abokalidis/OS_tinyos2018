@@ -89,6 +89,7 @@ typedef struct thread_control_block
 {
   PCB* owner_pcb;       /**< This is null for a free TCB */
   int priority; 
+  int fl;
   cpu_context_t context;     /**< The thread context */
 
 #ifndef NVALGRIND
